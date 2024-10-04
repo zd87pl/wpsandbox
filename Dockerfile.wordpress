@@ -1,9 +1,9 @@
-FROM wordpress:latest
+FROM --platform=linux/arm64 wordpress:latest
 
 # Install necessary tools
 RUN apt-get update && apt-get install -y \
     less \
-    mariadb-client \
+    default-mysql-client \
     zip \
     unzip \
     curl \

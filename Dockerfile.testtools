@@ -1,4 +1,4 @@
-FROM alpine:latest
+FROM --platform=linux/arm64 alpine:latest
 
 # Install necessary tools
 RUN apk add --no-cache \

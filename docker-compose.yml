@@ -5,6 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.wordpress
+    platform: linux/arm64
     ports:
       - "8080:80"
       - "8000:8000"
@@ -20,7 +21,8 @@ services:
       - db
 
   db:
-    image: mysql:5.7
+    image: mariadb:10.5
+    platform: linux/arm64
     environment:
       MYSQL_DATABASE: wordpress
       MYSQL_USER: wordpress
@@ -33,13 +35,15 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.testtools
+    platform: linux/arm64
     volumes:
       - ./logs:/logs
     depends_on:
       - wordpress
 
   frontend:
-    image: nginx:alpine
+    image: nginx:1.21-alpine
+    platform: linux/arm64
     ports:
       - "3000:80"
     volumes:

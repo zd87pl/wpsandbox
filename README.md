@@ -1,6 +1,6 @@
 # WooCommerce Testing Sandbox in Docker
 
-This project sets up a Docker-based testing environment for WooCommerce, allowing you to install plugins, monitor API calls, and analyze the interactions between plugins and WordPress/WooCommerce servers. It also includes a frontend dashboard for easy management.
+This project sets up a Docker-based testing environment for WooCommerce, allowing you to install plugins, monitor API calls, and analyze the interactions between plugins and WordPress/WooCommerce servers. It also includes a frontend dashboard for easy management. This setup is compatible with ARM64 architecture, including Apple Silicon Macs.
 
 ## Setup
 
@@ -13,6 +13,8 @@ This project sets up a Docker-based testing environment for WooCommerce, allowin
    ```
    docker-compose up --build
    ```
+
+   Note for Apple Silicon (M1/M2) users: The setup is configured to work with ARM64 architecture. No additional steps are required.
 
 4. Once the containers are up and running, you can access:
    - The WordPress site at `http://localhost:8080`
@@ -60,6 +62,10 @@ To use the plugin installation feature:
 - Monitors API calls made to WordPress and WooCommerce servers.
 - Provides an API endpoint for the frontend dashboard.
 
+### Database Container
+
+- Uses MariaDB 10.5, which is compatible with ARM64 architecture and serves as a drop-in replacement for MySQL.
+
 ### Test Tools Container
 
 - Captures network traffic related to API calls.
@@ -90,11 +96,16 @@ If you encounter any issues, check the Docker logs for each container:
 
 ```
 docker-compose logs wordpress
+docker-compose logs db
 docker-compose logs test-tools
 docker-compose logs frontend
 ```
 
 These logs can provide valuable information about any errors or unexpected behavior in the setup.
+
+For Apple Silicon (M1/M2) users:
+- If you encounter any ARM64-related issues, make sure your Docker Desktop is up to date and configured to use the new Virtualization framework.
+- The setup uses MariaDB instead of MySQL due to better ARM64 compatibility. This should not affect the functionality of the WordPress installation.
 
 ## Notes
 
