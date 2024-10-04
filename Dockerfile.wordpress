@@ -17,9 +17,6 @@ RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli
     && chmod +x wp-cli.phar \
     && mv wp-cli.phar /usr/local/bin/wp
 
-# Install WooCommerce
-RUN wp plugin install woocommerce --activate --allow-root
-
 # Copy custom scripts
 COPY scripts/install_plugins.sh /usr/local/bin/install_plugins.sh
 COPY scripts/monitor_api_calls.sh /usr/local/bin/monitor_api_calls.sh
