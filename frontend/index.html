@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WooCommerce Sandbox Dashboard</title>
-    <script src="https://unpkg.com/vue@next"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
@@ -25,6 +25,12 @@
                 <h2 class="text-xl font-semibold mb-4 text-gray-700">WordPress Status</h2>
                 <div><span class="font-medium">Version:</span> {{ wordpressStatus.version }}</div>
                 <div><span class="font-medium">WooCommerce Version:</span> {{ wordpressStatus.woocommerce_version }}</div>
+                <div class="mt-2">
+                    <a :href="wordpressStatus.url" target="_blank" class="text-blue-500 hover:underline">Visit WordPress Site</a>
+                </div>
+                <div>
+                    <a :href="wordpressStatus.admin_url" target="_blank" class="text-blue-500 hover:underline">Visit WordPress Admin</a>
+                </div>
             </div>
         </div>
         <div class="mt-6 bg-white rounded-lg shadow-md p-6">
@@ -36,71 +42,141 @@
             </ul>
         </div>
         <div class="mt-6 bg-white rounded-lg shadow-md p-6">
-            <h2 class="text-xl font-semibold mb-4 text-gray-700">Install Plugins</h2>
+            <h2 class="text-xl font-semibold mb-4 text-gray-700">Search and Install Plugins</h2>
+            <input v-model="searchQuery" @input="searchPlugins" type="text" placeholder="Search plugins..." class="mb-4 p-2 border rounded w-full">
+            <div v-if="searchError" class="text-red-500 mb-2">{{ searchError }}</div>
+            <ul class="list-disc pl-5">
+                <li v-for="plugin in searchResults" :key="plugin.slug" class="mb-2">
+                    {{ plugin.name }} - {{ plugin.short_description }}
+                    <button @click="installPlugin(plugin.slug)" class="ml-2 bg-blue-500 hover:bg-blue-600 text-white font-bold py-1 px-2 rounded text-sm">
+                        Install
+                    </button>
+                </li>
+            </ul>
+            <div v-if="searchResults.length === 0 && searchQuery.length >= 3" class="text-gray-500">No results found</div>
+        </div>
+        <div class="mt-6 bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold mb-4 text-gray-700">Install Plugins from CSV</h2>
             <input type="file" @change="handleFileUpload" class="mb-4 p-2 border rounded" accept=".csv">
             <button @click="installPlugins" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
                 Install Plugins
             </button>
         </div>
+        <div class="mt-6 bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold mb-4 text-gray-700">Debug Information</h2>
+            <pre class="bg-gray-100 p-2 rounded">{{ debugInfo }}</pre>
+        </div>
     </div>
 
     <script>
-        const app = Vue.createApp({
-            data() {
-                return {
-                    containerStatus: [
-                        { name: 'WordPress', status: 'checking...' },
-                        { name: 'Test Tools', status: 'checking...' }
-                    ],
-                    wordpressStatus: {
-                        version: 'checking...',
-                        woocommerce_version: 'checking...'
-                    },
-                    installedPlugins: [],
-                    selectedFile: null
-                }
-            },
-            methods: {
-                async fetchStatus() {
+        const { createApp, ref, onMounted, watch } = Vue;
+
+        createApp({
+            setup() {
+                const containerStatus = ref([]);
+                const wordpressStatus = ref({ version: '', woocommerce_version: '', url: '', admin_url: '' });
+                const installedPlugins = ref([]);
+                const selectedFile = ref(null);
+                const searchQuery = ref('');
+                const searchResults = ref([]);
+                const searchError = ref('');
+                const debugInfo = ref({});
+
+                const fetchStatus = async () => {
                     try {
-                        const response = await axios.get('/api/status');
-                        this.containerStatus = response.data.containers;
-                        this.wordpressStatus = response.data.wordpress;
-                        this.installedPlugins = response.data.plugins;
+                        const response = await axios.get('http://localhost:8000/api.php');
+                        containerStatus.value = response.data.containers;
+                        wordpressStatus.value = response.data.wordpress;
+                        installedPlugins.value = response.data.plugins;
+                        debugInfo.value = { ...debugInfo.value, statusResponse: response.data };
                     } catch (error) {
                         console.error('Error fetching status:', error);
+                        debugInfo.value = { ...debugInfo.value, statusError: error.message };
                     }
-                },
-                handleFileUpload(event) {
-                    this.selectedFile = event.target.files[0];
-                },
-                async installPlugins() {
-                    if (!this.selectedFile) {
+                };
+
+                const handleFileUpload = (event) => {
+                    selectedFile.value = event.target.files[0];
+                };
+
+                const installPlugins = async () => {
+                    if (!selectedFile.value) {
                         alert('Please select a CSV file first.');
                         return;
                     }
                     const formData = new FormData();
-                    formData.append('file', this.selectedFile);
+                    formData.append('file', selectedFile.value);
                     try {
-                        await axios.post('/api/install-plugins', formData, {
+                        const response = await axios.post('http://localhost:8000/install_plugins.php', formData, {
                             headers: {
                                 'Content-Type': 'multipart/form-data'
                             }
                         });
-                        alert('Plugins installation started. Please check the logs for details.');
-                        this.fetchStatus();
+                        alert(response.data.message);
+                        fetchStatus();
                     } catch (error) {
                         console.error('Error installing plugins:', error);
                         alert('Error installing plugins. Please check the logs for details.');
                     }
-                }
-            },
-            mounted() {
-                this.fetchStatus();
-                setInterval(this.fetchStatus, 30000); // Refresh every 30 seconds
+                };
+
+                const searchPlugins = async () => {
+                    if (searchQuery.value.length < 3) {
+                        searchResults.value = [];
+                        return;
+                    }
+                    try {
+                        debugInfo.value = { ...debugInfo.value, searchQuery: searchQuery.value };
+                        const response = await axios.get(`http://localhost:8000/api.php?search_plugin=${searchQuery.value}`);
+                        searchResults.value = response.data;
+                        searchError.value = '';
+                        debugInfo.value = { ...debugInfo.value, searchResponse: response.data };
+                    } catch (error) {
+                        console.error('Error searching plugins:', error);
+                        searchError.value = 'Error searching plugins. Please try again.';
+                        debugInfo.value = { ...debugInfo.value, searchError: error.message };
+                    }
+                };
+
+                const installPlugin = async (pluginSlug) => {
+                    try {
+                        const response = await axios.post('http://localhost:8000/install_plugins.php', { plugin: pluginSlug });
+                        alert(response.data.message);
+                        fetchStatus();
+                    } catch (error) {
+                        console.error('Error installing plugin:', error);
+                        alert('Error installing plugin. Please check the logs for details.');
+                    }
+                };
+
+                onMounted(() => {
+                    fetchStatus();
+                    setInterval(fetchStatus, 30000); // Refresh every 30 seconds
+                });
+
+                watch(searchQuery, () => {
+                    if (searchQuery.value.length >= 3) {
+                        searchPlugins();
+                    } else {
+                        searchResults.value = [];
+                    }
+                });
+
+                return {
+                    containerStatus,
+                    wordpressStatus,
+                    installedPlugins,
+                    handleFileUpload,
+                    installPlugins,
+                    searchQuery,
+                    searchResults,
+                    searchPlugins,
+                    installPlugin,
+                    searchError,
+                    debugInfo
+                };
             }
-        });
-        app.mount('#app');
+        }).mount('#app');
     </script>
 </body>
 </html>

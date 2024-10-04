@@ -20,6 +20,7 @@ services:
       WORDPRESS_ADMIN_EMAIL: admin@example.com
     volumes:
       - ./wp-content:/var/www/html/wp-content
+      - ./logs:/var/www/html/logs
     depends_on:
       - db
 

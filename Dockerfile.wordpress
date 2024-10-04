@@ -28,8 +28,8 @@ RUN chmod +x /usr/local/bin/install_plugins.sh \
 COPY scripts/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
-# Expose port 8000 for the API
-EXPOSE 8000
+# Expose ports
+EXPOSE 80 8000
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["apache2-foreground"]
