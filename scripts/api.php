@@ -21,6 +21,12 @@ function get_container_status($container_name) {
 }
 
 // Load WordPress
+if (!file_exists('/var/www/html/wp-load.php')) {
+    log_message("WordPress not found at expected location");
+    echo json_encode(['error' => 'WordPress not found']);
+    exit;
+}
+
 require_once('/var/www/html/wp-load.php');
 
 // Get WordPress and WooCommerce versions
@@ -72,9 +78,15 @@ if (isset($_GET['search_plugin'])) {
         log_message("Error from WordPress.org API: " . $response->get_error_message());
         echo json_encode(array('error' => $response->get_error_message()));
     } else {
-        $plugins = unserialize(wp_remote_retrieve_body($response));
-        log_message("Received response from WordPress.org API: " . print_r($plugins, true));
-        echo json_encode($plugins->plugins);
+        $body = wp_remote_retrieve_body($response);
+        log_message("Received response from WordPress.org API: " . $body);
+        $plugins = unserialize($body);
+        if ($plugins === false) {
+            log_message("Failed to unserialize response");
+            echo json_encode(array('error' => 'Failed to process API response'));
+        } else {
+            echo json_encode($plugins->plugins);
+        }
     }
 } else {
     echo json_encode($response);
