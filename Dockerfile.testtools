@@ -1,14 +1,12 @@
-FROM --platform=linux/arm64 alpine:latest
+FROM --platform=linux/arm64 python:3.9-slim
 
 # Install necessary tools
-RUN apk add --no-cache \
+RUN apt-get update && apt-get install -y \
     tcpdump \
-    bash \
-    python3 \
-    py3-pip
+    && rm -rf /var/lib/apt/lists/*
 
-# Install Python packages for processing data
-RUN pip3 install pandas requests
+# Install Python packages
+RUN pip install --no-cache-dir pandas requests scapy
 
 # Copy scripts
 COPY scripts/process_api_calls.py /usr/local/bin/process_api_calls.py
