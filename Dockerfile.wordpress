@@ -10,7 +10,10 @@ RUN apt-get update && apt-get install -y \
     tcpdump \
     && rm -rf /var/lib/apt/lists/*
 
-# Install WP-CLI
+# Copy docker binary
+COPY --from=docker:dind /usr/local/bin/docker /usr/local/bin/
+
+    # Install WP-CLI
 RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar \
     && chmod +x wp-cli.phar \
     && mv wp-cli.phar /usr/local/bin/wp
