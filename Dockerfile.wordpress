@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y \
     unzip \
     curl \
     tcpdump \
+    docker.io \
     && rm -rf /var/lib/apt/lists/*
 
 # Install WP-CLI
@@ -30,6 +31,9 @@ RUN chmod +x /usr/local/bin/entrypoint.sh
 
 # Expose ports
 EXPOSE 80 8000
+
+# Run Docker commands as root for Docker access
+USER root
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["apache2-foreground"]
