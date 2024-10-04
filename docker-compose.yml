@@ -53,6 +53,7 @@ services:
       - "3000:80"
     volumes:
       - ./frontend:/usr/share/nginx/html
+      - ./logs:/usr/share/nginx/html/logs
     depends_on:
       - wordpress
 
