@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WooCommerce Sandbox Dashboard</title>
+    <script src="https://unpkg.com/vue@next"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+    <div id="app" class="container mx-auto p-4">
+        <h1 class="text-3xl font-semibold mb-6 text-gray-800">WooCommerce Sandbox Dashboard</h1>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold mb-4 text-gray-700">Container Status</h2>
+                <div v-for="container in containerStatus" :key="container.name" class="mb-2">
+                    <span class="font-medium">{{ container.name }}:</span>
+                    <span :class="{'text-green-500': container.status === 'running', 'text-red-500': container.status !== 'running'}">
+                        {{ container.status }}
+                    </span>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold mb-4 text-gray-700">WordPress Status</h2>
+                <div><span class="font-medium">Version:</span> {{ wordpressStatus.version }}</div>
+                <div><span class="font-medium">WooCommerce Version:</span> {{ wordpressStatus.woocommerce_version }}</div>
+            </div>
+        </div>
+        <div class="mt-6 bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold mb-4 text-gray-700">Installed Plugins</h2>
+            <ul class="list-disc pl-5">
+                <li v-for="plugin in installedPlugins" :key="plugin.name" class="mb-1">
+                    {{ plugin.name }} ({{ plugin.version }})
+                </li>
+            </ul>
+        </div>
+        <div class="mt-6 bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold mb-4 text-gray-700">Install Plugins</h2>
+            <input type="file" @change="handleFileUpload" class="mb-4 p-2 border rounded" accept=".csv">
+            <button @click="installPlugins" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+                Install Plugins
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const app = Vue.createApp({
+            data() {
+                return {
+                    containerStatus: [
+                        { name: 'WordPress', status: 'checking...' },
+                        { name: 'Test Tools', status: 'checking...' }
+                    ],
+                    wordpressStatus: {
+                        version: 'checking...',
+                        woocommerce_version: 'checking...'
+                    },
+                    installedPlugins: [],
+                    selectedFile: null
+                }
+            },
+            methods: {
+                async fetchStatus() {
+                    try {
+                        const response = await axios.get('/api/status');
+                        this.containerStatus = response.data.containers;
+                        this.wordpressStatus = response.data.wordpress;
+                        this.installedPlugins = response.data.plugins;
+                    } catch (error) {
+                        console.error('Error fetching status:', error);
+                    }
+                },
+                handleFileUpload(event) {
+                    this.selectedFile = event.target.files[0];
+                },
+                async installPlugins() {
+                    if (!this.selectedFile) {
+                        alert('Please select a CSV file first.');
+                        return;
+                    }
+                    const formData = new FormData();
+                    formData.append('file', this.selectedFile);
+                    try {
+                        await axios.post('/api/install-plugins', formData, {
+                            headers: {
+                                'Content-Type': 'multipart/form-data'
+                            }
+                        });
+                        alert('Plugins installation started. Please check the logs for details.');
+                        this.fetchStatus();
+                    } catch (error) {
+                        console.error('Error installing plugins:', error);
+                        alert('Error installing plugins. Please check the logs for details.');
+                    }
+                }
+            },
+            mounted() {
+                this.fetchStatus();
+                setInterval(this.fetchStatus, 30000); // Refresh every 30 seconds
+            }
+        });
+        app.mount('#app');
+    </script>
+</body>
+</html>

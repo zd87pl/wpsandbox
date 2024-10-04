@@ -1,0 +1,39 @@
+FROM wordpress:latest
+
+# Install necessary tools
+RUN apt-get update && apt-get install -y \
+    less \
+    mariadb-client \
+    zip \
+    unzip \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Docker CLI
+RUN curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh
+
+# Install WP-CLI
+RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar \
+    && chmod +x wp-cli.phar \
+    && mv wp-cli.phar /usr/local/bin/wp
+
+# Install WooCommerce
+RUN wp plugin install woocommerce --activate --allow-root
+
+# Copy custom scripts
+COPY scripts/install_plugins.sh /usr/local/bin/install_plugins.sh
+COPY scripts/monitor_api_calls.sh /usr/local/bin/monitor_api_calls.sh
+COPY scripts/api.php /var/www/html/api.php
+
+RUN chmod +x /usr/local/bin/install_plugins.sh \
+    && chmod +x /usr/local/bin/monitor_api_calls.sh
+
+# Set up entrypoint
+COPY scripts/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+# Expose port 8000 for the API
+EXPOSE 8000
+
+ENTRYPOINT ["entrypoint.sh"]
+CMD ["apache2-foreground"]

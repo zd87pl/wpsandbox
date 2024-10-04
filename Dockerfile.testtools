@@ -1,0 +1,20 @@
+FROM alpine:latest
+
+# Install necessary tools
+RUN apk add --no-cache \
+    tcpdump \
+    bash \
+    python3 \
+    py3-pip
+
+# Install Python packages for processing data
+RUN pip3 install pandas requests
+
+# Copy scripts
+COPY scripts/process_api_calls.py /usr/local/bin/process_api_calls.py
+
+# Set up entrypoint
+COPY scripts/testtools_entrypoint.sh /usr/local/bin/testtools_entrypoint.sh
+RUN chmod +x /usr/local/bin/testtools_entrypoint.sh
+
+ENTRYPOINT ["/usr/local/bin/testtools_entrypoint.sh"]
