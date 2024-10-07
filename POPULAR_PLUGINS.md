@@ -2,7 +2,7 @@
 
 ## 1 WooCommerce Subscriptions
 
-TODO: How do we test this?
+Note: Seems to be paid: <https://woocommerce.com/products/woocommerce-subscriptions/?utm_source=google&utm_medium=cpc&utm_campaign=marketplace_search_brand_row&utm_content=conversions&gad_source=1&gclid=Cj0KCQjwjY64BhCaARIsAIfc7YYYIkTTRSrlYPL9q-9VPt89XiXeMAllpJzbSjbnC380eLlG6o-glIsaAkAXEALw_wcB>
 
 ## 2 WooCommerce Authorize.Net Gateway - PAID
  - Payment gateway plugin, allows users to save credit card info
