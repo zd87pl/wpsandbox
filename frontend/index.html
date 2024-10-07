@@ -127,7 +127,15 @@
                     }
                 };
 
-                const searchPlugins = async () => {
+                const debounce = (func, wait) => {
+                    let timeout;
+                    return (...args) => {
+                        clearTimeout(timeout);
+                        timeout = setTimeout(() => func.apply(this, args), wait);
+                    };
+                };
+
+                const searchPlugins = debounce(async () => {
                     if (searchQuery.value.length < 3) {
                         searchResults.value = [];
                         return;
@@ -143,11 +151,11 @@
                         searchError.value = 'Error searching plugins. Please try again.';
                         debugInfo.value = { ...debugInfo.value, searchError: error.message };
                     }
-                };
+                }, 300);
 
                 const installPlugin = async (pluginSlug) => {
                     try {
-                        const response = await axios.post('http://localhost:8000/install_plugins.php', { plugin: pluginSlug });
+                        const response = await axios.get(`http://localhost:8000/api.php?plugin_to_install=${pluginSlug}`);
                         alert(response.data.message);
                         fetchStatus();
                     } catch (error) {

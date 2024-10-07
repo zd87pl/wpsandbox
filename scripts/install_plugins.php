@@ -23,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif (isset($_POST['plugin'])) {
         $plugin = $_POST['plugin'];
         // Install single plugin using WP-CLI
-        $output = shell_exec("wp plugin install $plugin --activate --allow-root 2>&1");
+        $output = shell_exec("wp plugin install " . $plugin . " --activate --allow-root 2>&1");
         echo json_encode(['success' => true, 'message' => 'Plugin installation started', 'output' => $output]);
     } else {
         echo json_encode(['success' => false, 'message' => 'No file uploaded or plugin specified']);
