@@ -73,7 +73,7 @@ if (isset($_GET['search_plugin'])) {
         ))
     );
     log_message("Sending request to WordPress.org API");
-    $response = wp_remote_post($api_url, array('body' => $args));
+    $response = wp_remote_get($api_url, $args);
     if (is_wp_error($response)) {
         log_message("Error from WordPress.org API: " . $response->get_error_message());
         echo json_encode(array('error' => $response->get_error_message()));

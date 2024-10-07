@@ -34,12 +34,12 @@ To use the plugin installation feature:
 
 1. Create a CSV file with the list of plugins you want to install. The file should have the following format:
 
-   ```
+   ```csv
    plugin_name,plugin_url
    ```
 
    Example:
-   ```
+   ```csv
    jetpack,
    woocommerce-services,
    custom-plugin,https://example.com/custom-plugin.zip
@@ -78,7 +78,7 @@ The API call data is saved in `/logs/api_calls.csv` inside the test tools contai
 
 To copy the file from the container:
 
-```
+```sh
 docker cp $(docker-compose ps -q test-tools):/logs/api_calls.csv ./api_calls.csv
 ```
 
@@ -86,7 +86,7 @@ docker cp $(docker-compose ps -q test-tools):/logs/api_calls.csv ./api_calls.csv
 
 You can modify the scripts in the `scripts/` directory to add more functionality or change the behavior of the containers. Remember to rebuild the containers after making changes:
 
-```
+```sh
 docker-compose up --build
 ```
 
@@ -94,7 +94,7 @@ docker-compose up --build
 
 If you encounter any issues, check the Docker logs for each container:
 
-```
+```sh
 docker-compose logs wordpress
 docker-compose logs db
 docker-compose logs test-tools
