@@ -4,14 +4,14 @@
 
 TODO: How do we test this?
 
-## 2 WooCommerce Authorize.Net Gateway
+## 2 WooCommerce Authorize.Net Gateway - PAID
  - Payment gateway plugin, allows users to save credit card info
  - Can test by adding and saving credit card info in the checkout window.
  https://woocommerce.com/products/authorize-net/
 
 ## 3 Variation Swatches for WooCommerce
 
-## 4 WP All Import - WooCommerce Import Add-On Pro
+## 4 WP All Import - WooCommerce Import Add-On Pro - PAID
  - Product import plugin.
  - Usage instructions:
     - Go to All Import › New Import.
@@ -23,7 +23,7 @@ TODO: How do we test this?
 
 ## 5 WooCommerce Memberships
 
-## 6 WP All Export - WooCommerce Export Add-On Pro
+## 6 WP All Export - WooCommerce Export Add-On Pro - PAID
  - Allows users to export datasets: orders, customers, etc.
  - Can pair testing with WP All Import
  - Import with All Import and then test the Export functionality of this plugin afterward.
@@ -31,7 +31,7 @@ TODO: How do we test this?
 
 ## 7 WooCommerce Zapier
 
-## 8 WooCommerce USPS Shipping
+## 8 WooCommerce USPS Shipping - PAID
  - Provides USPS shipping rates within WooCommerce
  - Store must use USD for its currency and the USA for its base country.
  - Recommended alongside Woocommerce Shipping plugin.
@@ -39,28 +39,28 @@ TODO: How do we test this?
 
 ## 9 WooCommerce UPS Shipping
 
-## 10 Yoast SEO: WooCommerce
+## 10 Yoast SEO: WooCommerce - PAID
  - Search Engine Optimization plugin.
  - Load products to the store.
  - Conduct various searches.
 
 ## 11 WooCommerce Checkout Field Editor
 
-## 12 WooCommerce Customer/Order/Coupon Export
+## 12 WooCommerce Customer/Order/Coupon Export - PAID
  - Populate site with customer data (and cupon data?)
  - Utilise the plugin to export this data.
  https://woocommerce.com/products/ordercustomer-csv-export/
 
 ## 13 WooCommerce Google Product Feed
 
-## 14 Pixel Manager for WooCommerce
+## 14 Pixel Manager for WooCommerce - FREE
  - "This plugin tracks WooCommerce shop visitors and collects valuable data for conversion optimization of your shop and paid ads, dynamic remarketing, and reporting. It’s designed to boost sales and cut advertising costs through precise e-commerce tracking."
  - Install the plugin and play around with all aspects of the test site.
  https://wordpress.org/plugins/woocommerce-google-adwords-conversion-tracking-tag/
 
 ## 15 LearnDash LMS - WooCommerce Integration
 
-## 16 WooCommerce FedEx Shipping
+## 16 WooCommerce FedEx Shipping - PAID
  - Shipping plugin
  - Test the available options within the checkout page of the test site.
  - Different addresses, costs, currencies.
@@ -68,7 +68,7 @@ TODO: How do we test this?
 
 ## 17 WooCommerce Conditional Shipping and Payments
 
-## 18 TaxJar - Sales Tax Automation for WooCommerce
+## 18 TaxJar - Sales Tax Automation for WooCommerce - FREE
  - Sales tax calculation plugin.
  - Add items to the cart
  - View the realtime sales tax calc in the checkout page and sidenav.
@@ -76,7 +76,7 @@ TODO: How do we test this?
 
 ## 19 WooCommerce Sequential Order Numbers Pro
 
-## 20 WooCommerce Min/Max Quantities
+## 20 WooCommerce Min/Max Quantities - PAID
 - "Specify minimum and maximum quantity limits per product/variation, or per order.
    Require specific products, or product categories, to be purchased in predefined quantity multiples.
    Prevent overstocking or stockouts, maintain optimal inventory levels, and reduce storage costs."
