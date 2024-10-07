@@ -47,7 +47,8 @@
             <div v-if="searchError" class="text-red-500 mb-2">{{ searchError }}</div>
             <ul class="list-disc pl-5">
                 <li v-for="plugin in searchResults" :key="plugin.slug" class="mb-2">
-                    {{ plugin.name }} - {{ plugin.short_description }}
+                    <strong>{{ plugin.name }}</strong><br/>
+                    {{ plugin.short_description }}<br/>
                     <button @click="installPlugin(plugin.slug)" class="ml-2 bg-blue-500 hover:bg-blue-600 text-white font-bold py-1 px-2 rounded text-sm">
                         Install
                     </button>
@@ -64,8 +65,8 @@
                 </button>
             </div>
             <div class="bg-white rounded-lg shadow-md p-6">
-                <h2 class="text-xl font-semibold mb-4 text-gray-700">Download API Calls CSV</h2>
-                <a href="logs/api_calls.csv" target="_blank" class="text-blue-500 hover:underline">Download</a>
+                <h2 class="text-xl font-semibold mb-4 text-gray-700">API Calls</h2>
+                <a href="logs/api_calls.csv" target="_blank" class="text-blue-500 hover:underline">Download CSV</a>
             </div>  
         </div>
         <div class="mt-6 bg-white rounded-lg shadow-md p-6">
