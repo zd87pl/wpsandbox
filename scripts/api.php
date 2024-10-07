@@ -63,24 +63,23 @@ $response = array(
 if (isset($_GET['search_plugin'])) {
     log_message("Plugin search requested for: " . $_GET['search_plugin']);
     $search = $_GET['search_plugin'];
-    $api_url = "http://api.wordpress.org/plugins/info/1.2/";
-    $args = array(
-        'action' => 'query_plugins',
-        'request' => serialize((object) array(
-            'search' => $search,
-            'per_page' => 10,
-            'fields' => array('name', 'version', 'author', 'short_description', 'slug')
-        ))
+    $api_url = add_query_arg(
+        array(
+            'action' => 'query_plugins',
+            'search_arg' => $search,
+            'per_page' => 10
+        ),
+        'https://api.wordpress.org/plugins/info/1.2/'
     );
     log_message("Sending request to WordPress.org API");
-    $response = wp_remote_get($api_url, $args);
+    $response = wp_remote_get($api_url);
     if (is_wp_error($response)) {
         log_message("Error from WordPress.org API: " . $response->get_error_message());
         echo json_encode(array('error' => $response->get_error_message()));
     } else {
         $body = wp_remote_retrieve_body($response);
         log_message("Received response from WordPress.org API: " . $body);
-        $plugins = unserialize($body);
+        $plugins = json_decode($body);
         if ($plugins === false) {
             log_message("Failed to unserialize response");
             echo json_encode(array('error' => 'Failed to process API response'));
