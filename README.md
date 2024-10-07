@@ -10,7 +10,7 @@ This project sets up a Docker-based testing environment for WooCommerce, allowin
 
 3. Build and start the containers:
 
-   ```
+   ```sh
    docker-compose up --build
    ```
 
@@ -39,6 +39,7 @@ To use the plugin installation feature:
    ```
 
    Example:
+
    ```csv
    jetpack,
    woocommerce-services,
@@ -104,6 +105,7 @@ docker-compose logs frontend
 These logs can provide valuable information about any errors or unexpected behavior in the setup.
 
 For Apple Silicon (M1/M2) users:
+
 - If you encounter any ARM64-related issues, make sure your Docker Desktop is up to date and configured to use the new Virtualization framework.
 - The setup uses MariaDB instead of MySQL due to better ARM64 compatibility. This should not affect the functionality of the WordPress installation.
 
@@ -112,3 +114,14 @@ For Apple Silicon (M1/M2) users:
 - This setup is intended for testing purposes only and should not be used in a production environment.
 - Make sure to comply with the licenses of all plugins you install and test.
 - The API call monitoring may capture sensitive information. Ensure you handle the captured data securely and in compliance with relevant privacy regulations.
+
+## Sample Products
+
+In order to import sample products, proceed as following:
+
+1. In wp-admin go to Products > Import
+1. “Show advanced options”
+1. Product path: ./wp-content/plugins/woocommerce/sample-data/sample_products.csv
+1. Continue
+1. Confirm all the columns mapping
+1. Finish

@@ -9,3 +9,4 @@
 - [ ] List/Search API calls (new page) (Jonathan/Conor)
 - [ ] Include file name and line number in the API calls CSV (James/Patryk)
 - [ ] Put together a list of plugins to perform tests
+- [x] Add section on how to import sample products to README.md
