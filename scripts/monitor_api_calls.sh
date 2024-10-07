@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Directory to store tcpdump output
-TCPDUMP_DIR="/var/www/html/logs/tcpdump_output"
+TCPDUMP_DIR="/var/www/html/logs"
 mkdir -p "$TCPDUMP_DIR"
 
 # Start tcpdump to capture HTTP traffic
