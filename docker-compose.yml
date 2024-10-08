@@ -20,6 +20,7 @@ services:
       WORDPRESS_ADMIN_EMAIL: admin@example.com
     volumes:
       - ./wp-content:/var/www/html/wp-content
+      - ./source-file-interceptor:/var/www/html/wp-content/plugins/source-file-interceptor
       - ./logs:/var/www/html/logs
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:

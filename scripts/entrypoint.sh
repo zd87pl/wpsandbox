@@ -32,6 +32,11 @@ if [ -f "/var/www/html/plugins.csv" ]; then
     /usr/local/bin/install_plugins.sh /var/www/html/plugins.csv
 fi
 
+if [ -f "/var/www/html/wp-content/plugins/source-file-interceptor" ]; then
+    echo "Enabling WP HTTP interceptor"
+    wp plugin activate source-file-interceptor
+fi
+
 # Start monitoring API calls in the background
 /usr/local/bin/monitor_api_calls.sh &
 
