@@ -82,6 +82,10 @@ function run_source_file_interceptor() {
 run_source_file_interceptor();
 
 function inject_source_ctx($parsed_args, $url) {
+	if (str_starts_with($url, $_ENV['ELASTICSEARCH_URL'])) {
+		return $parsed_args;
+	}
+
     $e = new \Exception();
 	$traceString = $e->getTraceAsString();
 	$trace = preg_split("/\r\n|\n|\r/", $traceString);
@@ -105,11 +109,49 @@ function inject_source_ctx($parsed_args, $url) {
 			header("X-Source-File: {$srcFile}");
 			header("X-Source-Line: {$srcLine}");
 
+			preg_match("/(?P<asset_type>(mu\-)?plugins|themes)\/(?P<name>[^\/]+)/", $srcFile, $matches);
+			$assetType = $matches['asset_type'];
+			$assetName = $matches['name'];
+
+			$dt = new DateTime();
+			$iso8601 = $dt->format(DateTime::ATOM);
+			$parsedURL = parse_url($url);
+			$queryParams = array();
+			parse_str($parsedURL['query'], $queryParams);
+			$payload = array(
+				'wp_remote_func' => $func,
+				'request_uri' => $url,
+				'host' => $parsedURL['host'],
+				'path' => $parsedURL['path'],
+				'query_params' => $queryParams,
+				'method' => $parsed_args['method'],
+				'source_file' => $srcFile,
+				'source_line' => $srcLine,
+				'asset_type' => $assetType,
+				'asset_name' => $assetName,
+				'timestamp' => $iso8601,
+			);
 
 			error_log("Detected call to {$func} in file {$srcFile}, line {$srcLine}");
+
+			$res = wp_remote_post(
+				"{$_ENV['ELASTICSEARCH_URL']}/api-calls/_doc",
+				array (
+					'headers' => array('Content-Type' => 'application/json; charset=utf-8'),
+					'body' => json_encode($payload),
+					'method' => 'POST',
+					'data_format' => 'body',
+				)
+			);
+
+			error_log("ElasticSearch POST request result: " . var_export($res, true));
+
 		}
 	}
+
+
+
 	return $parsed_args;
 }
 
-add_filter('http_request_args', 'inject_source_ctx', 10, 3);
+add_filter('http_request_args', 'inject_source_ctx', 999, 3);
