@@ -1,2 +1,4 @@
 wp-content/
 logs/
+.vscode/
+elasticsearch-data/
