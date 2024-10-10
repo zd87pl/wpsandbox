@@ -1,148 +1,145 @@
-# WooCommerce Testing Sandbox in Docker
+# FakeWoo Project
 
-This project sets up a Docker-based testing environment for WooCommerce, allowing you to install plugins, monitor API calls, and analyze the interactions between plugins and WordPress/WooCommerce servers. It also includes a frontend dashboard for easy management. This setup is compatible with ARM64 architecture, including Apple Silicon Macs.
+## Overview
 
-## Setup
+FakeWoo is a comprehensive project designed to simulate and analyze WordPress plugin behavior in a controlled environment. It includes various components for intercepting, logging, and analyzing network requests made by WordPress plugins, as well as performing code analysis on installed plugins.
 
-1. Make sure you have Docker and Docker Compose installed on your system.
+## Components
 
-2. Clone this repository to your local machine.
+### 1. Source File Interceptor Plugin
 
-3. Build and start the containers:
+The Source File Interceptor is a WordPress plugin that intercepts outgoing requests and provides network security telemetry.
 
-   ```sh
-   docker-compose up --build
-   ```
+#### Features:
+- Dynamic domain reputation checking using the VirusTotal API
+- Configurable through WordPress admin interface
+- Logs request details and domain reputation scores to Elasticsearch
 
-   Note for Apple Silicon (M1/M2) users: The setup is configured to work with ARM64 architecture. No additional steps are required.
+For more details, see the [Source File Interceptor README](./source-file-interceptor/README.md).
 
-4. Once the containers are up and running, you can access:
-   - The WordPress site at `http://localhost:8080`
-   - The frontend dashboard at `http://localhost:3000`
+### 2. Code Analysis Service
 
-5. To configure Kibana to provide a search UI for collected HTTP requests, perform the following
-   1. Ensure that at least one outbound HTTP request has been issued from the WordPress install
-      1. This can be triggered from the [Plugins > Add New Plugin](http://localhost:8080/wp-admin/plugin-install.php) page
-   2. Open the Kibana dashboard at <http://localhost:5601>
-   3. Navigate to the Stack Management page in the main sidebar
-   4. Navigate to [Kibana > Data Views](http://localhost:5601/app/management/kibana/dataViews) in the Management sidebar
-   5. Click `Create data view`
-   6. Provide a name for the data view
-   7. Set `Index pattern` to `api-calls`
-   8. Set `Timestamp field`
-   9. The data view will now be available when navigating to the [Analytics > Discover](http://localhost:5601/app/discover) page in the main sidebar
+A Python-based service that analyzes the code of installed WordPress plugins using the Gemini API.
 
-<!-- Github admonition syntax - see https://github.com/orgs/community/discussions/16925 -->
-> [!NOTE]
-> In the future, the Kibana data view will be automatically created
+#### Features:
+- Automatic analysis of plugin code for security issues, code quality, and best practices
+- Integration with Google Cloud's Gemini API for advanced code analysis
+- Results stored in Elasticsearch for further analysis and visualization
 
-## Frontend Dashboard
+### 3. Docker Environment
 
-The frontend dashboard provides an easy-to-use interface for managing your WooCommerce testing sandbox. It offers the following features:
+The project uses Docker to create a controlled WordPress environment for testing and analysis.
 
-- View the status of WordPress and Test Tools containers
-- Check WordPress and WooCommerce versions
-- See a list of installed plugins
-- Upload a CSV file with plugins to install
-- Trigger plugin installation
+### 4. Elasticsearch and Kibana
 
-To use the plugin installation feature:
+Used for storing and visualizing logged data from the Source File Interceptor plugin and the Code Analysis Service.
 
-1. Create a CSV file with the list of plugins you want to install. The file should have the following format:
+## Setup and Usage
 
-   ```csv
-   plugin_name,plugin_url
-   ```
+1. Clone this repository
+2. Navigate to the project directory
+3. Place your Google Cloud credentials file (for Gemini API access) in the root directory as `google-credentials.json`
+4. Run `docker-compose up -d` to start the WordPress environment and all services
+5. Access the WordPress admin panel and activate the Source File Interceptor plugin
+6. Configure the Source File Interceptor plugin with your VirusTotal API key
+7. Install or activate any WordPress plugins you want to analyze
+8. The Code Analysis Service will automatically analyze newly installed plugins
+9. Use Kibana to visualize and analyze the logged data from both the Source File Interceptor and Code Analysis Service
 
-   Example:
+## Data Organization in Elasticsearch
 
-   ```csv
-   jetpack,
-   woocommerce-services,
-   custom-plugin,https://example.com/custom-plugin.zip
-   ```
+- Network logs: indexed as `plugin-{plugin_name}-logs`
+- VirusTotal reputation scores: included in the network logs
+- Code analysis results: indexed as `plugin-{plugin_name}-analysis`
 
-   You can specify plugins in two ways:
-   - Just the plugin name: The script will install the plugin from the WordPress.org repository.
-   - Plugin name and URL: The script will install the plugin from the provided URL.
+To visualize this data in Kibana:
 
-2. In the frontend dashboard, use the file upload input to select your CSV file.
+1. Access Kibana (usually at http://localhost:5601)
+2. Create index patterns for `plugin-*-logs` and `plugin-*-analysis`
+3. Create dashboards and visualizations using these index patterns
+4. Use the `plugin_name` field to filter data for specific plugins
 
-3. Click the "Install Plugins" button to start the installation process.
+## Requirements
 
-## Functionality
+- Docker and Docker Compose
+- VirusTotal API key
+- Google Cloud account with Gemini API access
+- Elasticsearch and Kibana (included in Docker setup)
 
-### WordPress Container
+## TODO
 
-- Automatically installs and activates WooCommerce.
-- Installs and activates additional plugins specified in `plugins.csv` (if present).
-- Monitors API calls made to WordPress and WooCommerce servers.
-- Provides an API endpoint for the frontend dashboard.
+Future improvements for the FakeWoo project:
 
-### Database Container
+1. Real-time monitoring and alerting
+   - Implement WebSocket server for live updates
+   - Set up configurable alerts for suspicious activities
+   - Integrate with notification services (Slack, email)
 
-- Uses MariaDB 10.5, which is compatible with ARM64 architecture and serves as a drop-in replacement for MySQL.
+2. Machine learning integration for anomaly detection
+   - Implement ML models for detecting unusual plugin behavior
+   - Use historical data for personalized anomaly detection
+   - Integrate with cloud-based ML services
 
-### Test Tools Container
+3. Expanded code analysis capabilities
+   - Implement more sophisticated static code analysis
+   - Add dynamic code analysis for runtime behavior
+   - Include vulnerability scanning against CVE databases
 
-- Captures network traffic related to API calls.
-- Processes the captured data every 5 minutes.
-- Generates a CSV file (`/logs/api_calls.csv`) with information about the API calls, including the plugin that made the call, the endpoint, the HTTP method, and the timestamp.
+4. User-friendly dashboard in WordPress admin
+   - Create custom admin page with activity overview
+   - Implement interactive charts and graphs
+   - Add filtering and search capabilities
 
-### ElasticSearch and Kibana Containers
+5. Performance optimization
+   - Implement caching mechanisms
+   - Optimize database queries and Elasticsearch indexing
+   - Support distributed processing of analysis tasks
 
-- Stores data about HTTP requests made using the WordPress HTTP API
-- Provide a frontend to browse/search captured HTTP request data
+6. Integration with more security services
+   - Expand beyond VirusTotal
+   - Create plugin system for adding new security services
 
-## Analyzing Results
+7. Automated reporting
+   - Generate periodic summary reports
+   - Implement exportable reports (PDF, CSV, JSON)
 
-The API call data is saved in `/logs/api_calls.csv` inside the test tools container. You can access this file by copying it from the container or by mounting a volume to the `/logs` directory in the `docker-compose.yml` file.
+8. Plugin behavior simulation
+   - Create sandboxed environment for plugin simulation
+   - Record and analyze behavior in various scenarios
 
-To copy the file from the container:
+9. Collaborative analysis features
+   - Implement user roles and permissions
+   - Add commenting and tagging for investigations
 
-```sh
-docker cp $(docker-compose ps -q test-tools):/logs/api_calls.csv ./api_calls.csv
-```
+10. API for external integrations
+    - Develop RESTful API for external access
+    - Provide webhooks for real-time data pushing
 
-## Customization
+## Contributing
 
-You can modify the scripts in the `scripts/` directory to add more functionality or change the behavior of the containers. Remember to rebuild the containers after making changes:
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-```sh
-docker-compose up --build
-```
+## License
 
-## Troubleshooting
+This project is licensed under the GPL v2 or later.
 
-If you encounter any issues, check the Docker logs for each container:
+## Changelog
 
-```sh
-docker-compose logs wordpress
-docker-compose logs db
-docker-compose logs test-tools
-docker-compose logs frontend
-```
+### 1.2.0
+- Added Code Analysis Service using Gemini API
+- Updated Docker setup to include the new service
+- Enhanced data organization in Elasticsearch for per-plugin analysis
+- Improved documentation and setup instructions
 
-These logs can provide valuable information about any errors or unexpected behavior in the setup.
+### 1.1.0
+- Added dynamic domain reputation checking to Source File Interceptor plugin
+- Updated Source File Interceptor admin interface for VirusTotal API key configuration
+- Enhanced logging capabilities with domain reputation scores
 
-For Apple Silicon (M1/M2) users:
+### 1.0.0
+- Initial release of FakeWoo project
+- Basic request interception and logging functionality
 
-- If you encounter any ARM64-related issues, make sure your Docker Desktop is up to date and configured to use the new Virtualization framework.
-- The setup uses MariaDB instead of MySQL due to better ARM64 compatibility. This should not affect the functionality of the WordPress installation.
+## Support
 
-## Notes
-
-- This setup is intended for testing purposes only and should not be used in a production environment.
-- Make sure to comply with the licenses of all plugins you install and test.
-- The API call monitoring may capture sensitive information. Ensure you handle the captured data securely and in compliance with relevant privacy regulations.
-
-## Sample Products
-
-In order to import sample products, proceed as following:
-
-1. In wp-admin go to Products > Import
-1. “Show advanced options”
-1. Product path: ./wp-content/plugins/woocommerce/sample-data/sample_products.csv
-1. Continue
-1. Confirm all the columns mapping
-1. Finish
+For support, please open an issue on the project's GitHub repository.

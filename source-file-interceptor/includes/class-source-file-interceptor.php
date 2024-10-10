@@ -25,7 +25,7 @@
  * @since      1.0.0
  * @package    Source_File_Interceptor
  * @subpackage Source_File_Interceptor/includes
- * @author     James O'Brien <james.obrien@wpengine.com>
+ * @author     James O'Brien <james@example.com>
  */
 class Source_File_Interceptor {
 
@@ -156,6 +156,16 @@ class Source_File_Interceptor {
 
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
+
+		// Add menu item
+		$this->loader->add_action( 'admin_menu', $plugin_admin, 'add_options_page' );
+
+		// Add Settings link to the plugin
+		$plugin_basename = plugin_basename( plugin_dir_path( __DIR__ ) . $this->plugin_name . '.php' );
+		$this->loader->add_filter( 'plugin_action_links_' . $plugin_basename, $plugin_admin, 'add_action_links' );
+
+		// Save/Update our plugin options
+		$this->loader->add_action('admin_init', $plugin_admin, 'register_setting');
 
 	}
 

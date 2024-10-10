@@ -3,11 +3,6 @@
 /**
  * The plugin bootstrap file
  *
- * This file is read by WordPress to generate the plugin information in the plugin
- * admin area. This file also includes all of the dependencies used by the plugin,
- * registers the activation and deactivation functions, and defines a function
- * that starts the plugin.
- *
  * @link              https://example.com
  * @since             1.0.0
  * @package           Source_File_Interceptor
@@ -15,8 +10,8 @@
  * @wordpress-plugin
  * Plugin Name:       source-file-interceptor
  * Plugin URI:        https://example.com
- * Description:       This is a description of the plugin.
- * Version:           1.0.0
+ * Description:       This plugin intercepts and logs outgoing requests, checking domain reputation using VirusTotal API and triggers code analysis for new plugins.
+ * Version:           1.2.0
  * Author:            James O'Brien
  * Author URI:        https://example.com/
  * License:           GPL-2.0+
@@ -30,26 +25,13 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
-/**
- * Currently plugin version.
- * Start at version 1.0.0 and use SemVer - https://semver.org
- * Rename this for your plugin and update it as you release new versions.
- */
-define( 'SOURCE_FILE_INTERCEPTOR_VERSION', '1.0.0' );
+define( 'SOURCE_FILE_INTERCEPTOR_VERSION', '1.2.0' );
 
-/**
- * The code that runs during plugin activation.
- * This action is documented in includes/class-source-file-interceptor-activator.php
- */
 function activate_source_file_interceptor() {
 	require_once plugin_dir_path( __FILE__ ) . 'includes/class-source-file-interceptor-activator.php';
 	Source_File_Interceptor_Activator::activate();
 }
 
-/**
- * The code that runs during plugin deactivation.
- * This action is documented in includes/class-source-file-interceptor-deactivator.php
- */
 function deactivate_source_file_interceptor() {
 	require_once plugin_dir_path( __FILE__ ) . 'includes/class-source-file-interceptor-deactivator.php';
 	Source_File_Interceptor_Deactivator::deactivate();
@@ -58,28 +40,50 @@ function deactivate_source_file_interceptor() {
 register_activation_hook( __FILE__, 'activate_source_file_interceptor' );
 register_deactivation_hook( __FILE__, 'deactivate_source_file_interceptor' );
 
-/**
- * The core plugin class that is used to define internationalization,
- * admin-specific hooks, and public-facing site hooks.
- */
 require plugin_dir_path( __FILE__ ) . 'includes/class-source-file-interceptor.php';
 
-/**
- * Begins execution of the plugin.
- *
- * Since everything within the plugin is registered via hooks,
- * then kicking off the plugin from this point in the file does
- * not affect the page life cycle.
- *
- * @since    1.0.0
- */
 function run_source_file_interceptor() {
-
 	$plugin = new Source_File_Interceptor();
 	$plugin->run();
-
 }
 run_source_file_interceptor();
+
+function check_domain_security($domain) {
+    $api_key = get_option('source_file_interceptor_virustotal_api_key', '');
+    if (empty($api_key)) {
+        error_log("VirusTotal API key is not set");
+        return array('score' => 0, 'message' => 'VirusTotal API key is not set');
+    }
+
+    $url = "https://www.virustotal.com/api/v3/domains/" . $domain;
+    $args = array(
+        'headers' => array(
+            'x-apikey' => $api_key
+        )
+    );
+
+    $response = wp_remote_get($url, $args);
+
+    if (is_wp_error($response)) {
+        error_log("Error checking domain security: " . $response->get_error_message());
+        return array('score' => 0, 'message' => 'Error checking domain security');
+    }
+
+    $body = wp_remote_retrieve_body($response);
+    $data = json_decode($body, true);
+
+    if (isset($data['data']['attributes']['reputation'])) {
+        $reputation = $data['data']['attributes']['reputation'];
+        $score = max(0, min(100, $reputation + 100)); // Convert -100 to 100 scale to 0 to 100 scale
+        $message = "Domain reputation score: $reputation";
+    } else {
+        $score = 50; // Default score if reputation is not available
+        $message = "Unable to determine domain reputation";
+    }
+
+    error_log("Security check for domain {$domain}: Score {$score}, Message: {$message}");
+    return array('score' => $score, 'message' => $message);
+}
 
 function inject_source_ctx($parsed_args, $url) {
 	if (str_starts_with($url, $_ENV['ELASTICSEARCH_URL'])) {
@@ -118,7 +122,12 @@ function inject_source_ctx($parsed_args, $url) {
 			$parsedURL = parse_url($url);
 			$queryParams = array();
 			parse_str($parsedURL['query'], $queryParams);
+
+            // Check the security score of the domain
+            $security_check = check_domain_security($parsedURL['host']);
+
 			$payload = array(
+				'plugin_name' => $assetName,
 				'wp_remote_func' => $func,
 				'request_uri' => $url,
 				'host' => $parsedURL['host'],
@@ -128,14 +137,15 @@ function inject_source_ctx($parsed_args, $url) {
 				'source_file' => $srcFile,
 				'source_line' => $srcLine,
 				'asset_type' => $assetType,
-				'asset_name' => $assetName,
 				'timestamp' => $iso8601,
+                'security_score' => $security_check['score'],
+                'security_message' => $security_check['message']
 			);
 
 			error_log("Detected call to {$func} in file {$srcFile}, line {$srcLine}");
 
 			$res = wp_remote_post(
-				"{$_ENV['ELASTICSEARCH_URL']}/api-calls/_doc",
+				"{$_ENV['ELASTICSEARCH_URL']}/plugin-{$assetName}-logs/_doc",
 				array (
 					'headers' => array('Content-Type' => 'application/json; charset=utf-8'),
 					'body' => json_encode($payload),
@@ -145,13 +155,53 @@ function inject_source_ctx($parsed_args, $url) {
 			);
 
 			error_log("ElasticSearch POST request result: " . var_export($res, true));
-
 		}
 	}
-
-
 
 	return $parsed_args;
 }
 
 add_filter('http_request_args', 'inject_source_ctx', 999, 3);
+
+function trigger_code_analysis($plugin) {
+    // Get the path of the main plugin file
+    $plugin_path = WP_PLUGIN_DIR . '/' . $plugin;
+
+    // Trigger the code analysis service
+    $analysis_service_url = 'http://code-analysis:5000/analyze';
+    $response = wp_remote_post($analysis_service_url, array(
+        'body' => json_encode(array('plugin_path' => $plugin_path)),
+        'headers' => array('Content-Type' => 'application/json'),
+    ));
+
+    if (is_wp_error($response)) {
+        error_log('Error triggering code analysis: ' . $response->get_error_message());
+    } else {
+        $body = wp_remote_retrieve_body($response);
+        $result = json_decode($body, true);
+        error_log('Code analysis result: ' . print_r($result, true));
+
+        // Extract plugin name from the path
+        $plugin_name = basename(dirname($plugin_path));
+
+        // Add plugin name to the result
+        $result['plugin_name'] = $plugin_name;
+
+        // Store the analysis result in Elasticsearch
+        $es_response = wp_remote_post(
+            "{$_ENV['ELASTICSEARCH_URL']}/plugin-{$plugin_name}-analysis/_doc",
+            array(
+                'headers' => array('Content-Type' => 'application/json; charset=utf-8'),
+                'body' => json_encode($result),
+                'method' => 'POST',
+                'data_format' => 'body',
+            )
+        );
+
+        if (is_wp_error($es_response)) {
+            error_log('Error storing code analysis result in Elasticsearch: ' . $es_response->get_error_message());
+        }
+    }
+}
+
+add_action('activated_plugin', 'trigger_code_analysis');
