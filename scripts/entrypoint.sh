@@ -32,9 +32,9 @@ if [ -f "/var/www/html/plugins.csv" ]; then
     /usr/local/bin/install_plugins.sh /var/www/html/plugins.csv
 fi
 
-if [ -f "/var/www/html/wp-content/plugins/source-file-interceptor" ]; then
+if [ -d "/var/www/html/wp-content/plugins/source-file-interceptor" ]; then
     echo "Enabling WP HTTP interceptor"
-    wp plugin activate source-file-interceptor
+    wp plugin activate source-file-interceptor --allow-root
 fi
 
 # Start monitoring API calls in the background
