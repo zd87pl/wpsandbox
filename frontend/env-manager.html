@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Environment Variable Manager</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Environment Variable Manager</h1>
+        <form id="env-form">
+            <div class="form-group">
+                <label for="gemini-api-key">Gemini API Key:</label>
+                <input type="text" id="gemini-api-key" name="gemini-api-key" required>
+            </div>
+            <div class="form-group">
+                <label for="elastic-address">Elasticsearch Address:</label>
+                <input type="text" id="elastic-address" name="elastic-address" required>
+            </div>
+            <div class="form-group">
+                <label for="virustotal-api-key">VirusTotal API Key:</label>
+                <input type="text" id="virustotal-api-key" name="virustotal-api-key" required>
+            </div>
+            <button type="submit">Save Changes</button>
+        </form>
+        <div id="message"></div>
+    </div>
+    <script>
+        document.getElementById('env-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            
+            try {
+                const response = await fetch('/api/update-env', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+                });
+                
+                if (response.ok) {
+                    document.getElementById('message').textContent = 'Environment variables updated successfully!';
+                } else {
+                    throw new Error('Failed to update environment variables');
+                }
+            } catch (error) {
+                document.getElementById('message').textContent = error.message;
+            }
+        });
+    </script>
+</body>
+</html>

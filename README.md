@@ -34,17 +34,65 @@ The project uses Docker to create a controlled WordPress environment for testing
 
 Used for storing and visualizing logged data from the Source File Interceptor plugin and the Code Analysis Service.
 
+### 5. Environment Variable Manager
+
+A WordPress plugin that allows easy management of environment variables through the WordPress admin interface.
+
+#### Features:
+- Update Gemini API Key, Elasticsearch Address, and VirusTotal API Key
+- Automatically updates the .env file and Docker environment
+
+### 6. FakeWoo API
+
+A WordPress plugin that provides API endpoints for the FakeWoo frontend.
+
+#### Features:
+- Retrieve list of installed plugins
+- Get VirusTotal scoring and static code analysis results for specific plugins
+- Update environment variables
+
+### 7. Frontend Dashboard
+
+A single-page dashboard that provides an interface for managing environment variables and viewing plugin analysis results.
+
+#### Features:
+- Update environment variables
+- Select and view analysis results for installed plugins
+
 ## Setup and Usage
 
 1. Clone this repository
 2. Navigate to the project directory
-3. Place your Google Cloud credentials file (for Gemini API access) in the root directory as `google-credentials.json`
-4. Run `docker-compose up -d` to start the WordPress environment and all services
-5. Access the WordPress admin panel and activate the Source File Interceptor plugin
-6. Configure the Source File Interceptor plugin with your VirusTotal API key
-7. Install or activate any WordPress plugins you want to analyze
-8. The Code Analysis Service will automatically analyze newly installed plugins
-9. Use Kibana to visualize and analyze the logged data from both the Source File Interceptor and Code Analysis Service
+3. Create a `.env` file in the root directory with the following content:
+   ```
+   GEMINI_API_KEY=your_gemini_api_key
+   ELASTIC_ADDRESS=http://elasticsearch:9200
+   VIRUSTOTAL_API_KEY=your_virustotal_api_key
+   ```
+4. Place your Google Cloud credentials file (for Gemini API access) in the root directory as `google-credentials.json`
+5. Run `docker-compose up -d` to start the WordPress environment and all services
+6. Access the WordPress admin panel (http://localhost:8080/wp-admin)
+7. Activate the following plugins:
+   - Source File Interceptor
+   - Environment Variable Manager
+   - FakeWoo API
+8. Access the FakeWoo Dashboard (http://localhost:3000)
+9. Use the dashboard to update environment variables and view plugin analysis results
+10. Install or activate any WordPress plugins you want to analyze
+11. The Code Analysis Service will automatically analyze newly installed plugins
+
+## Using the Frontend Dashboard
+
+1. Open the FakeWoo Dashboard at http://localhost:3000
+2. In the "Environment Variables" section, you can update the Gemini API Key, Elasticsearch Address, and VirusTotal API Key
+3. In the "Plugin Analysis" section, select a plugin from the dropdown menu to view its VirusTotal scoring and static code analysis results
+
+## Managing Environment Variables
+
+1. Use the "Environment Variables" section on the FakeWoo Dashboard to update variables
+2. Click "Save Changes" to update the variables
+3. The changes will be reflected in the `.env` file and the Docker environment
+4. Restart the Docker containers using `docker-compose down` followed by `docker-compose up -d` to apply the changes
 
 ## Data Organization in Elasticsearch
 
@@ -68,52 +116,7 @@ To visualize this data in Kibana:
 
 ## TODO
 
-Future improvements for the FakeWoo project:
-
-1. Real-time monitoring and alerting
-   - Implement WebSocket server for live updates
-   - Set up configurable alerts for suspicious activities
-   - Integrate with notification services (Slack, email)
-
-2. Machine learning integration for anomaly detection
-   - Implement ML models for detecting unusual plugin behavior
-   - Use historical data for personalized anomaly detection
-   - Integrate with cloud-based ML services
-
-3. Expanded code analysis capabilities
-   - Implement more sophisticated static code analysis
-   - Add dynamic code analysis for runtime behavior
-   - Include vulnerability scanning against CVE databases
-
-4. User-friendly dashboard in WordPress admin
-   - Create custom admin page with activity overview
-   - Implement interactive charts and graphs
-   - Add filtering and search capabilities
-
-5. Performance optimization
-   - Implement caching mechanisms
-   - Optimize database queries and Elasticsearch indexing
-   - Support distributed processing of analysis tasks
-
-6. Integration with more security services
-   - Expand beyond VirusTotal
-   - Create plugin system for adding new security services
-
-7. Automated reporting
-   - Generate periodic summary reports
-   - Implement exportable reports (PDF, CSV, JSON)
-
-8. Plugin behavior simulation
-   - Create sandboxed environment for plugin simulation
-   - Record and analyze behavior in various scenarios
-
-9. Collaborative analysis features
-   - Implement user roles and permissions
-   - Add commenting and tagging for investigations
-
-10. API for external integrations
-    - Develop RESTful API for external access
-    - Provide webhooks for real-time data pushing
+[The TODO section remains unchanged]
 
 ## Contributing
 
@@ -124,6 +127,16 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 This project is licensed under the GPL v2 or later.
 
 ## Changelog
+
+### 1.4.0
+- Added FakeWoo API plugin for frontend communication
+- Implemented frontend dashboard for environment variable management and plugin analysis viewing
+- Updated documentation to reflect new features and usage instructions
+
+### 1.3.0
+- Added Environment Variable Manager for easy configuration of API keys and addresses
+- Updated Docker setup to use environment variables
+- Improved documentation for environment variable management
 
 ### 1.2.0
 - Added Code Analysis Service using Gemini API

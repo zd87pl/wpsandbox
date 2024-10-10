@@ -18,12 +18,16 @@ services:
       WORDPRESS_ADMIN_USER: admin
       WORDPRESS_ADMIN_PASSWORD: password
       WORDPRESS_ADMIN_EMAIL: admin@example.com
-      ELASTICSEARCH_URL: http://elasticsearch:9200
+      ELASTICSEARCH_URL: ${ELASTIC_ADDRESS}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      VIRUSTOTAL_API_KEY: ${VIRUSTOTAL_API_KEY}
     volumes:
       - ./wp-content:/var/www/html/wp-content
       - ./source-file-interceptor:/var/www/html/wp-content/plugins/source-file-interceptor
+      - ./wp-content/plugins/env-manager:/var/www/html/wp-content/plugins/env-manager
       - ./logs:/var/www/html/logs
       - /var/run/docker.sock:/var/run/docker.sock
+      - ./.env:/var/www/html/.env
     depends_on:
       - db
       - elasticsearch
@@ -94,6 +98,7 @@ services:
       - ./google-credentials.json:/app/google-credentials.json:ro
     environment:
       - GOOGLE_APPLICATION_CREDENTIALS=/app/google-credentials.json
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
     depends_on:
       - wordpress
 
