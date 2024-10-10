@@ -15,20 +15,27 @@ def process_pcap(pcap_file, csv_file):
     for packet in packets:
         if IP in packet and TCP in packet and Raw in packet:
             payload = packet[Raw].load.decode('utf-8', errors='ignore')
-            if 'GET' in payload or 'POST' in payload:
-                lines = payload.split('\r\n')
-                request_line = lines[0]
-                host = next((line.split(': ')[1] for line in lines if line.startswith('Host: ')), '')
-                user_agent = next((line.split(': ')[1] for line in lines if line.startswith('User-Agent: ')), '')
-                
+            lines = payload.split('\r\n')
+            if 'X-WP-Remote-Call' in payload:
+                wp_remote_func = next((line.split(': ')[1] for line in lines if line.startswith('X-WP-Remote-Call: ')), '')
+                request_line = next((line.split(': ')[1] for line in lines if line.startswith('X-Request-URI: ')), '')
+                host = next((line.split(': ')[1] for line in lines if line.startswith('X-Host: ')), '')
+                user_agent = next((line.split(': ')[1] for line in lines if line.startswith('X-User-Agent: ')), '')
+                source_file = next((line.split(': ')[1] for line in lines if line.startswith('X-Source-File: ')), '')
+                source_line = next((line.split(': ')[1] for line in lines if line.startswith('X-Source-Line: ')), '')
+                method = next((line.split(': ')[1] for line in lines if line.startswith('X-Request-Method: ')), '')
+
                 plugin = extract_plugin_name(user_agent)
-                endpoint = f"{host}{request_line.split()[1]}"
-                
+                endpoint = f"{host}{request_line}"
+
                 api_calls.append({
                     'plugin': plugin,
                     'endpoint': endpoint,
-                    'method': request_line.split()[0],
-                    'timestamp': packet.time
+                    'method': method,
+                    'source_file': source_file,
+                    'source_line': source_line,
+                    'wp_remote_func': wp_remote_func,
+                    'timestamp': packet.time,
                 })
 
     df = pd.DataFrame(api_calls)

@@ -20,6 +20,22 @@ This project sets up a Docker-based testing environment for WooCommerce, allowin
    - The WordPress site at `http://localhost:8080`
    - The frontend dashboard at `http://localhost:3000`
 
+5. To configure Kibana to provide a search UI for collected HTTP requests, perform the following
+   1. Ensure that at least one outbound HTTP request has been issued from the WordPress install
+      1. This can be triggered from the [Plugins > Add New Plugin](http://localhost:8080/wp-admin/plugin-install.php) page
+   2. Open the Kibana dashboard at <http://localhost:5601>
+   3. Navigate to the Stack Management page in the main sidebar
+   4. Navigate to [Kibana > Data Views](http://localhost:5601/app/management/kibana/dataViews) in the Management sidebar
+   5. Click `Create data view`
+   6. Provide a name for the data view
+   7. Set `Index pattern` to `api-calls`
+   8. Set `Timestamp field`
+   9. The data view will now be available when navigating to the [Analytics > Discover](http://localhost:5601/app/discover) page in the main sidebar
+
+<!-- Github admonition syntax - see https://github.com/orgs/community/discussions/16925 -->
+> [!NOTE]
+> In the future, the Kibana data view will be automatically created
+
 ## Frontend Dashboard
 
 The frontend dashboard provides an easy-to-use interface for managing your WooCommerce testing sandbox. It offers the following features:
@@ -72,6 +88,11 @@ To use the plugin installation feature:
 - Captures network traffic related to API calls.
 - Processes the captured data every 5 minutes.
 - Generates a CSV file (`/logs/api_calls.csv`) with information about the API calls, including the plugin that made the call, the endpoint, the HTTP method, and the timestamp.
+
+### ElasticSearch and Kibana Containers
+
+- Stores data about HTTP requests made using the WordPress HTTP API
+- Provide a frontend to browse/search captured HTTP request data
 
 ## Analyzing Results
 

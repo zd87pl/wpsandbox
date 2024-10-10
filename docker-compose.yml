@@ -18,12 +18,15 @@ services:
       WORDPRESS_ADMIN_USER: admin
       WORDPRESS_ADMIN_PASSWORD: password
       WORDPRESS_ADMIN_EMAIL: admin@example.com
+      ELASTICSEARCH_URL: http://elasticsearch:9200
     volumes:
       - ./wp-content:/var/www/html/wp-content
+      - ./source-file-interceptor:/var/www/html/wp-content/plugins/source-file-interceptor
       - ./logs:/var/www/html/logs
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       - db
+      - elasticsearch
 
   db:
     image: mariadb:10.5
@@ -56,6 +59,30 @@ services:
       - ./logs:/usr/share/nginx/html/logs
     depends_on:
       - wordpress
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.2
+    container_name: elasticsearch
+    restart: always
+    environment:
+      - xpack.security.enabled=false
+      - discovery.type=single-node
+    cap_add:
+      - IPC_LOCK
+    volumes:
+      - ./elasticsearch-data:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+  kibana:
+    container_name: kibana
+    image: docker.elastic.co/kibana/kibana:8.15.2
+    restart: always
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200    # address of elasticsearch docker container which kibana will connect
+    ports:
+      - 5601:5601
+    depends_on:
+      - elasticsearch                                   # kibana will start when elasticsearch has started
 
 volumes:
   db_data:
