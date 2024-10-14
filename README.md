@@ -1,8 +1,8 @@
-# FakeWoo Project
+# wpsandbox Project
 
 ## Overview
 
-FakeWoo is a comprehensive project designed to simulate and analyze WordPress plugin behavior in a controlled environment. It includes various components for intercepting, logging, and analyzing network requests made by WordPress plugins, as well as performing code analysis on installed plugins.
+wpsandbox is a comprehensive project designed to simulate and analyze WordPress plugin behavior in a controlled environment. It includes various components for intercepting, logging, and analyzing network requests made by WordPress plugins, as well as performing code analysis on installed plugins.
 
 ## Components
 
@@ -36,15 +36,15 @@ Used for storing and visualizing logged data from the Source File Interceptor pl
 
 ### 5. Environment Variable Manager
 
-A WordPress plugin that allows easy management of environment variables through the WordPress admin interface.
+A feature integrated into the main dashboard that allows easy management of environment variables.
 
 #### Features:
 - Update Gemini API Key, Elasticsearch Address, and VirusTotal API Key
 - Automatically updates the .env file and Docker environment
 
-### 6. FakeWoo API
+### 6. wpsandbox API
 
-A WordPress plugin that provides API endpoints for the FakeWoo frontend.
+A WordPress plugin that provides API endpoints for the wpsandbox frontend.
 
 #### Features:
 - Retrieve list of installed plugins
@@ -53,9 +53,10 @@ A WordPress plugin that provides API endpoints for the FakeWoo frontend.
 
 ### 7. Frontend Dashboard
 
-A single-page dashboard that provides an interface for managing environment variables and viewing plugin analysis results.
+A comprehensive dashboard that provides an interface for viewing intercepted requests, managing environment variables, and analyzing plugins.
 
 #### Features:
+- Display real-time intercepted requests
 - Update environment variables
 - Select and view analysis results for installed plugins
 
@@ -74,22 +75,29 @@ A single-page dashboard that provides an interface for managing environment vari
 6. Access the WordPress admin panel (http://localhost:8080/wp-admin)
 7. Activate the following plugins:
    - Source File Interceptor
-   - Environment Variable Manager
-   - FakeWoo API
-8. Access the FakeWoo Dashboard (http://localhost:3000)
-9. Use the dashboard to update environment variables and view plugin analysis results
-10. Install or activate any WordPress plugins you want to analyze
-11. The Code Analysis Service will automatically analyze newly installed plugins
+   - wpsandbox API
+8. Access the wpsandbox Dashboard (http://localhost:3000)
+9. Use the dashboard to view intercepted requests, update environment variables, and analyze plugins
 
 ## Using the Frontend Dashboard
 
-1. Open the FakeWoo Dashboard at http://localhost:3000
-2. In the "Environment Variables" section, you can update the Gemini API Key, Elasticsearch Address, and VirusTotal API Key
-3. In the "Plugin Analysis" section, select a plugin from the dropdown menu to view its VirusTotal scoring and static code analysis results
+1. Open the wpsandbox Dashboard at http://localhost:3000
+2. The dashboard is divided into three main sections:
+
+   a. Intercepted Requests:
+   - View real-time updates of intercepted requests made by WordPress plugins
+
+   b. Environment Variables:
+   - Update the Gemini API Key, Elasticsearch Address, and VirusTotal API Key
+   - Click "Save Changes" to update the variables
+
+   c. Plugin Analysis:
+   - Select a plugin from the dropdown menu
+   - View its VirusTotal scoring and static code analysis results
 
 ## Managing Environment Variables
 
-1. Use the "Environment Variables" section on the FakeWoo Dashboard to update variables
+1. Use the "Environment Variables" section on the wpsandbox Dashboard to update variables
 2. Click "Save Changes" to update the variables
 3. The changes will be reflected in the `.env` file and the Docker environment
 4. Restart the Docker containers using `docker-compose down` followed by `docker-compose up -d` to apply the changes
@@ -129,9 +137,10 @@ This project is licensed under the GPL v2 or later.
 ## Changelog
 
 ### 1.4.0
-- Added FakeWoo API plugin for frontend communication
-- Implemented frontend dashboard for environment variable management and plugin analysis viewing
-- Updated documentation to reflect new features and usage instructions
+- Integrated environment variable management into the main dashboard
+- Added plugin analysis feature to the main dashboard
+- Updated wpsandbox API to support new dashboard features
+- Improved documentation to reflect dashboard enhancements
 
 ### 1.3.0
 - Added Environment Variable Manager for easy configuration of API keys and addresses
@@ -150,7 +159,7 @@ This project is licensed under the GPL v2 or later.
 - Enhanced logging capabilities with domain reputation scores
 
 ### 1.0.0
-- Initial release of FakeWoo project
+- Initial release of wpsandbox project
 - Basic request interception and logging functionality
 
 ## Support

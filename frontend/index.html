@@ -10,6 +10,11 @@
     <div class="container">
         <h1>FakeWoo Dashboard</h1>
         
+        <!-- Original functionality -->
+        <h2>Intercepted Requests</h2>
+        <div id="requests-container"></div>
+
+        <!-- New Environment Variables Management -->
         <h2>Environment Variables</h2>
         <form id="env-form">
             <div class="form-group">
@@ -28,6 +33,7 @@
         </form>
         <div id="env-message"></div>
 
+        <!-- New Plugin Analysis -->
         <h2>Plugin Analysis</h2>
         <select id="plugin-select">
             <option value="">Select a plugin</option>
@@ -41,6 +47,25 @@
     </div>
 
     <script>
+        // Original functionality
+        function fetchRequests() {
+            fetch('/api/requests')
+                .then(response => response.json())
+                .then(data => {
+                    const container = document.getElementById('requests-container');
+                    container.innerHTML = '';
+                    data.forEach(request => {
+                        const requestElement = document.createElement('div');
+                        requestElement.textContent = `${request.method} ${request.url}`;
+                        container.appendChild(requestElement);
+                    });
+                });
+        }
+
+        // Fetch requests initially and every 5 seconds
+        fetchRequests();
+        setInterval(fetchRequests, 5000);
+
         // Environment Variables Form Submission
         document.getElementById('env-form').addEventListener('submit', async (e) => {
             e.preventDefault();
